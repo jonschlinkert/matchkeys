@@ -19,21 +19,8 @@ var resolveDep = require('resolve-dep');
 exports = module.exports = {};
 
 
-// Create Array.isArray() if it's not already natively available.
-if(!Array.isArray) {
-  Array.isArray = function (vArg) {
-    return Object.prototype.toString.call(vArg) === "[object Array]";
-  };
-}
-
-var isArray = function (src) {
-  return Array.isArray(src) && src instanceof Array;
-};
-
-
 // Ensure config has keywords
 function loadPkg(config) {
-
   var result = {}
   result.keywords = []
 
@@ -42,26 +29,13 @@ function loadPkg(config) {
   }
 
   // populate keywords, if any
-  if(isArray(config.keywords)) {
+  if(_.isArray(config.keywords)) {
     result.keywords = config.keywords;
   } else {
     console.log(chalk.red("Error: No keywords found. Keywords must be formatted as an array."));
   }
-
   return result;
 }
-
-/**
- * Compare an array of keywords against multiple arrays of keywords.
- * @param  {Array} keys         Keywords to test against.
- * @param  {Array} multiArrays  Array of objects, each with a keywords property/array
- * @return {Array}              Array of matching keywords
- */
-exports.multiKeys = function(keys, multiArrays) {
-  return _.filter(multiArrays, function(arr) {
-    return _.intersection(keys.keywords || [], arr.keywords || []).length > 0;
-  });
-};
 
 /**
  * Compare two arrays of keywords
@@ -69,9 +43,15 @@ exports.multiKeys = function(keys, multiArrays) {
  * @param  {Array}  b  Array of keywords to search for matches.
  * @return {Boolean}   Return true if keywords match, otherwise false.
  */
-exports.keys = function(a, b) {
-  return _.intersection(a.keywords || [], b.keywords || []);
+exports.match = function(keywords, a, b) {
+  if(typeof(keywords) !== 'string') {
+    b = a;
+    a = keywords;
+    keywords = 'keywords';
+  }
+  return _.intersection(a[keywords] || [], b[keywords] || []);
 };
+
 
 /**
  * Compare two arrays of keywords and return true if ANY keywords match.
@@ -79,23 +59,34 @@ exports.keys = function(a, b) {
  * @param  {Array}  b  Array of keywords to search for matches.
  * @return {Boolean}   Return true if keywords match, otherwise false.
  */
-exports.isKeywordMatch = function(a, b) {
-  return _.intersection(a.keywords || [], b.keywords || []).length > 0;
+exports.isMatch = function(keywords, a, b) {
+  if(typeof(keywords) !== 'string') {
+    b = a;
+    a = keywords;
+    keywords = 'keywords';
+  }
+  return _.intersection(a[keywords] || [], b[keywords] || []).length > 0;
 };
 
 
 /**
- * Resolve paths to keywords based on keyword matches
- * @param  {[type]} keys   [description]
- * @param  {[type]} config [description]
- * @return {[type]}        [description]
+ * Compare an array of keywords against multiple arrays of keywords.
+ * @param  {Array} keys  Keywords to test against.
+ * @param  {Array} arrs  Multple arrays. More specifically, an array of objects,
+ *                       each with a keywords property/array
+ * @return {Array}       Array of matching keywords
  */
-exports.resolve = function (keys, config) {
-  config = loadPkg(config);
-  return exports.matchkeys(keys, config).map(function (keywords) {
-    return resolveDep.resolvePath(keywords);
+exports.matchPkgs = function(keywords, arr, arrs) {
+  if(typeof(keywords) !== 'string') {
+    arrs = arr;
+    arr = keywords;
+    keywords = 'keywords';
+  }
+  return _.filter(arrs, function(arr) {
+    return _.intersection(arr[keywords] || [], arr[keywords] || []).length > 0;
   });
 };
+
 
 /**
  * Return any keywords in the given list that match keywords in config.keywords.
@@ -111,13 +102,42 @@ exports.filter = function(pattern, config) {
 
 
 /**
+ * Resolve paths to keywords based on keyword matches
+ * @param  {[type]} keys   [description]
+ * @param  {[type]} config [description]
+ * @return {[type]}        [description]
+ */
+exports.resolve = function (patterns, config) {
+  config = loadPkg(config);
+  return _.compact(_.flatten(exports.filter(patterns, config).map(function (pattern) {
+    return resolveDep.dep(pattern).join();
+  })));
+};
+
+/**
  * Return the resolved filepaths to any npm modules that match the given list of keywords.
  * @param  {[type]} patterns [description]
  * @param  {[type]} config   [description]
  * @return {[type]}          [description]
  */
-exports.filterResolve = function (patterns, config) {
-  return exports.filter(patterns, config).map(function (pattern) {
-    return resolveDep.resolvePath(pattern);
-  });
+exports.resolveDev = function (patterns, config) {
+  config = loadPkg(config);
+  return _.compact(_.flatten(exports.filter(patterns, config).map(function (pattern) {
+    return resolveDep.dev(pattern).join();
+  })));
 };
+
+
+/**
+ * Return the resolved filepaths to any npm modules that match the given list of keywords.
+ * @param  {[type]} patterns [description]
+ * @param  {[type]} config   [description]
+ * @return {[type]}          [description]
+ */
+exports.resolveAll = function (patterns, config) {
+  config = loadPkg(config);
+  return _.compact(_.flatten(exports.filter(patterns, config).map(function (pattern) {
+    return resolveDep.all(pattern).join();
+  })));
+};
+
