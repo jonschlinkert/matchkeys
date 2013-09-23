@@ -1,6 +1,6 @@
 # matchkeys [![NPM version](https://badge.fury.io/js/matchkeys.png)](http://badge.fury.io/js/matchkeys)
 
-> Return an array of resolved filepaths for specified npm module dependencies. Minimatch patterns can be used.
+> Return an array of resolved filepaths for npm module dependencies that match keywords in package.json. Minimatch patterns can be used.
 
 
 ## Getting started
