@@ -26,8 +26,8 @@ function readJSON(src) {
 }
 
 // Create our test objects and keywords arrays.
-var multiplePkgs = readJSON('./test/fixtures/multi.json');
-var singlePkg = readJSON('./test/fixtures/package.json');
+var pkgs = readJSON('./test/fixtures/multi.json');
+var pkg = readJSON('./test/fixtures/package.json');
 
 
 var multiArr = [
@@ -53,7 +53,7 @@ var config = {
 
 
 console.log(chalk.cyan("keys.match"), keys.match(first, second));
-console.log(chalk.cyan("keys.matchPkgs"), keys.matchPkgs(singlePkg, multiplePkgs));
+console.log(chalk.cyan("keys.matchPkgs"), keys.matchPkgs(pkg, pkgs));
 console.log(chalk.cyan("keys.isMatch"), keys.isMatch(first, second));
 console.log(chalk.cyan("keys.filter"), keys.filter('*'));
 console.log(chalk.cyan("keys.filter"), keys.filter('*', config));
