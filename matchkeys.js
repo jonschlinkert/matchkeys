@@ -8,11 +8,10 @@
 
 'use strict';
 
-var path = require('path');
-var _ = require('lodash');
-var chalk = require('chalk');
-var minimatch = require('minimatch');
 var resolveDep = require('resolve-dep');
+var minimatch  = require('minimatch');
+var chalk      = require('chalk');
+var _          = require('lodash');
 
 
 // Export the matchkeys object.
@@ -25,7 +24,7 @@ function loadPkg(config) {
   result.keywords = []
 
   if (typeof config !== 'object') {
-    config = require(path.resolve(process.cwd(), 'package.json'));
+    config = require(require('path').resolve(process.cwd(), 'package.json'));
   }
 
   // populate keywords, if any
