@@ -31,7 +31,7 @@ function loadPkg(config) {
   if(_.isArray(config.keywords)) {
     result.keywords = config.keywords;
   } else {
-    console.log(chalk.red("Error: No keywords found. Keywords must be formatted as an array."));
+    return [];
   }
   return result;
 }
