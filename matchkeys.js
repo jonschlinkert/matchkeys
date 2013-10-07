@@ -31,7 +31,7 @@ function loadPkg(config) {
   if(_.isArray(config.keywords)) {
     result.keywords = config.keywords;
   } else {
-    return [];
+    return {keywords: []};
   }
   return result;
 }
