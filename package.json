@@ -45,12 +45,8 @@
     "resolved"
   ],
   "dependencies": {
-    "chalk": "~0.4.0",
-    "load-pkg": "~0.1.0",
     "lodash": "~2.4.1",
-    "matched": "^0.1.1",
-    "minimatch": "~0.2.14",
-    "resolve-dep": "~0.2.0"
+    "matched": "^0.1.1"
   },
   "devDependencies": {
     "chai": "~1.9.1",

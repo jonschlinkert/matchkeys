@@ -7,7 +7,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var pkg = require('load-pkg');
+var pkg = require('../package');
 var matchkeys = require('../');
 
 console.log(matchkeys)
