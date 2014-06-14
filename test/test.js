@@ -1,65 +1,123 @@
 /**
- * matchkeys
- * https://github.com/jonschlinkert/matchkeys
+ * randomatic <https://github.com/jonschlinkert/randomatic>
  *
- * Copyright (c) 2013 Jon Schlinkert, contributors.
+ * Copyright (c) 2014 Jon Schlinkert, contributors.
  * Licensed under the MIT license.
  */
-
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
-var chalk = require('chalk');
-var _ = require('lodash');
+var expect = require('chai').expect;
+var pkg = require('load-pkg');
+var matchkeys = require('../');
 
-// This module.
-var keys = require('../');
+console.log(matchkeys)
+
+var a = ['foo', 'chalk'];
+var b = ['bar', 'baz', 'quux'];
+var c = ['foo', 'bar', 'baz'];
+
+var keywords = ['pkg', 'keywords', 'blah'];
+
+describe('matchkeys.match()', function () {
+  it('should return a an empty array when no matches are found', function (done) {
+    var actual = matchkeys.find(a, b);
+    expect(actual).to.deep.equal([]);
+    done();
+  });
+
+  it('should return an array of matching keywords', function (done) {
+    var actual = matchkeys.find(a, c);
+    expect(actual).to.deep.equal(['foo']);
+    done();
+  });
+
+  it('should return an array of matching keywords', function (done) {
+    var actual = matchkeys.find(b, c);
+    expect(actual).to.deep.equal(['bar', 'baz']);
+    done();
+  });
+
+  it('should return an array of matching keywords', function (done) {
+    var actual = matchkeys.find(pkg.keywords, keywords);
+    expect(actual.sort()).to.deep.equal(['pkg', 'keywords'].sort());
+    done();
+  });
+
+  it('should return a an empty array when no matches are found', function (done) {
+    var actual = matchkeys.find({keywords: a}, b);
+    expect(actual).to.deep.equal([]);
+    done();
+  });
+
+  it('should return an array of matching keywords', function (done) {
+    var actual = matchkeys.find({keywords: a}, {keywords: c});
+    expect(actual).to.deep.equal(['foo']);
+    done();
+  });
+
+  it('should return an array of matching keywords', function (done) {
+    var actual = matchkeys.find({keywords: b}, {keywords: c});
+    expect(actual).to.deep.equal(['bar', 'baz']);
+    done();
+  });
+
+  it('should return an array of matching keywords', function (done) {
+    var actual = matchkeys.find(pkg.keywords, keywords);
+    expect(actual.sort()).to.deep.equal(['pkg', 'keywords'].sort());
+    done();
+  });
+});
 
 
+describe('matchkeys.hasMatch()', function () {
+  it('should return false when no matches are found', function (done) {
+    var actual = matchkeys.hasMatch(a, b);
+    expect(actual).to.deep.equal(false);
+    done();
+  });
 
-// TODO: assert
+  it('should return true when matches are found', function (done) {
+    var actual = matchkeys.hasMatch(a, c);
+    expect(actual).to.deep.equal(true);
+    done();
+  });
 
+  it('should return true when matches are found', function (done) {
+    var actual = matchkeys.hasMatch(b, c);
+    expect(actual).to.deep.equal(true);
+    done();
+  });
 
-function readJSON(src) {
-  return JSON.parse(fs.readFileSync(path.join(process.cwd(), src)), 'utf8');
-}
-
-// Create our test objects and keywords arrays.
-var pkgs = readJSON('./test/fixtures/multi.json');
-var pkg = readJSON('./test/fixtures/package.json');
-
-
-var multiArr = [
-  {
-    keywords: ['A', 'B', 'C', 'D', 'E', 'F']
-  },
-  {
-    keywords: ['A', 'B', 'C', 'D', 'I', 'F']
-  }
-];
-
-var first = {
-  keywords: ['A', 'B', 'C', 'D', 'E', 'F']
-};
-var second = {
-  keywords: ['C', 'E', 'G', 'I', 'J']
-};
+  it('should return true when matches are found', function (done) {
+    var actual = matchkeys.hasMatch(pkg.keywords, keywords);
+    expect(actual).to.deep.equal(true);
+    done();
+  });
+});
 
 
-var config = {
-  keywords: ['baz', 'bar', 'foo', 'node-foo']
-};
+// describe('matchkeys.filter()', function () {
+//   it('should return an array of keywords matching the given glob patterns', function (done) {
+//     var actual = matchkeys.filter(a, '*');
+//     expect(actual).to.deep.equal(['foo', 'chalk']);
+//     done();
+//   });
 
+//   it('should return an array of keywords matching the given glob patterns', function (done) {
+//     var actual = matchkeys.filter(a, 'chalk');
+//     expect(actual).to.deep.equal(['chalk']);
+//     done();
+//   });
 
-console.log(chalk.cyan("keys.match"), keys.match(first, second));
-console.log(chalk.cyan("keys.matchPkgs"), keys.matchPkgs(pkg, pkgs));
-console.log(chalk.cyan("keys.isMatch"), keys.isMatch(first, second));
-console.log(chalk.cyan("keys.filter"), keys.filter('*'));
-console.log(chalk.cyan("keys.filter"), keys.filter('*', config));
-console.log(chalk.cyan("keys.resolve"), keys.resolve('*'));
-console.log(chalk.cyan("keys.resolve"), keys.resolve('*', config));
-console.log(chalk.cyan("keys.resolveDev"), keys.resolveDev('*'));
-console.log(chalk.cyan("keys.resolveDev"), keys.resolveDev('*', config));
-console.log(chalk.cyan("keys.resolveAll"), keys.resolveAll('*'));
-console.log(chalk.cyan("keys.resolveAll"), keys.resolveAll('*', config));
+//   it('should return an array of keywords matching the given glob patterns', function (done) {
+//     var actual = matchkeys.filter(a, ['chalk']);
+//     expect(actual).to.deep.equal(['chalk']);
+//     done();
+//   });
+
+//   it('should return an empty array when no matches are found', function (done) {
+//     var actual = matchkeys.filter(a, 'bbbbbb');
+//     expect(actual).to.deep.equal([]);
+//     done();
+//   });
+// });

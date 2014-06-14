@@ -1,52 +1,81 @@
 /**
- * matchkeys
- * https://github.com/jonschlinkert/matchkeys
+ * matchkeys <https://github.com/jonschlinkert/matchkeys>
  *
- * Copyright (c) 2013 Jon Schlinkert, contributors.
+ * Copyright (c) 2014 Jon Schlinkert, contributors.
  * Licensed under the MIT license.
  */
 
 'use strict';
 
 var resolveDep = require('resolve-dep');
-var minimatch  = require('minimatch');
-var chalk      = require('chalk');
-var _          = require('lodash');
-
+var minimatch = require('minimatch');
+var pkg = require('load-pkg');
+var _ = require('lodash');
 
 // Export the matchkeys object.
-exports = module.exports = {};
+var matchkeys = module.exports = {};
 
+var toArray = function(val) {
+  return !Array.isArray(val) ? [val] : val;
+};
 
-// Ensure config has keywords
-function loadPkg(config) {
-  var result = {}
-  result.keywords = []
-
-  if (typeof config !== 'object') {
-    config = require(require('path').resolve(process.cwd(), 'package.json'));
+var matches = function(arr, patterns, options) {
+  if (!arr || !patterns) {
+    return [];
   }
 
-  // populate keywords, if any
-  if(_.isArray(config.keywords)) {
-    result.keywords = config.keywords;
+  var opts = options || {}, matches = [], omissions = [];
+  arr = toArray(arr), patterns = toArray(patterns);
+
+  _.flatten(patterns.map(function(pattern) {
+    if (/!/.test(pattern)) {
+      pattern = pattern.replace('!', '');
+      omissions = omissions.concat(minimatch.match(arr, pattern, opts));
+    }
+    matches = matches.concat(minimatch.match(arr, pattern, opts));
+  }));
+
+  return _.difference(matches, omissions);
+};
+
+// console.log(matches(['foo', 'bar', 'baz'], ['f*', '*z']));
+console.log(matches(['foo', 'bar', 'baz'], ['!*z', 'f*']));
+
+
+// Check config for keywords
+function loadKeywords(config) {
+  // Allow an array to be passed in directly
+  if (Array.isArray(config)) {
+    return config;
   }
-  return result;
+
+  config = config || {};
+  var keywords = config.keywords || pkg.keywords || [];
+
+  if (!Array.isArray(keywords)) {
+    throw new Error('  [matchkeys]: keywords must be an array');
+  }
+
+  if (keywords.length < 1) {
+    throw new Error('  [matchkeys]: no keywords found.');
+  }
+
+  return keywords;
 }
+
 
 /**
  * Compare two arrays of keywords
+ * @param  {[type]} keywords [description]
  * @param  {Array}  a  Array of keywords to test against.
  * @param  {Array}  b  Array of keywords to search for matches.
  * @return {Boolean}   Return true if keywords match, otherwise false.
  */
-exports.match = function(keywords, a, b) {
-  if(typeof(keywords) !== 'string') {
-    b = a;
-    a = keywords;
-    keywords = 'keywords';
-  }
-  return _.intersection(a[keywords] || [], b[keywords] || []);
+
+matchkeys.find = function(a, b) {
+  a = loadKeywords(a);
+  b = loadKeywords(b);
+  return _.intersection(a, b);
 };
 
 
@@ -56,32 +85,9 @@ exports.match = function(keywords, a, b) {
  * @param  {Array}  b  Array of keywords to search for matches.
  * @return {Boolean}   Return true if keywords match, otherwise false.
  */
-exports.isMatch = function(keywords, a, b) {
-  if(typeof(keywords) !== 'string') {
-    b = a;
-    a = keywords;
-    keywords = 'keywords';
-  }
-  return _.intersection(a[keywords] || [], b[keywords] || []).length > 0;
-};
 
-
-/**
- * Compare an array of keywords against multiple arrays of keywords.
- * @param  {Array} keys  Keywords to test against.
- * @param  {Array} arrs  Multple arrays. More specifically, an array of objects,
- *                       each with a keywords property/array
- * @return {Array}       Array of matching keywords
- */
-exports.matchPkgs = function(keywords, arr, arrs) {
-  if(typeof(keywords) !== 'string') {
-    arrs = arr;
-    arr = keywords;
-    keywords = 'keywords';
-  }
-  return _.filter(arrs, function(arr) {
-    return _.intersection(arr[keywords] || [], arr[keywords] || []).length > 0;
-  });
+matchkeys.hasMatch = function(a, b) {
+  return matchkeys.find(a, b).length > 0;
 };
 
 
@@ -91,25 +97,27 @@ exports.matchPkgs = function(keywords, arr, arrs) {
  * @param  {[type]} config  [description]
  * @return {[type]}         [description]
  */
-exports.filter = function(pattern, config) {
-  config = loadPkg(config);
-  var search = config.keywords;
-  return minimatch.match(search, pattern, {});
+
+matchkeys.filter = function(config, pattern, options) {
+  var keywords = loadKeywords(config);
+  return minimatch.match(keywords, pattern, options);
 };
 
 
 /**
- * Resolve paths to keywords based on keyword matches
+ * Resolve paths to npm modules based on keyword matches
  * @param  {[type]} keys   [description]
  * @param  {[type]} config [description]
  * @return {[type]}        [description]
  */
-exports.resolve = function (patterns, config) {
-  config = loadPkg(config);
-  return _.compact(_.flatten(exports.filter(patterns, config).map(function (pattern) {
+
+matchkeys.resolve = function (patterns, config, options) {
+  var keywords = loadKeywords(config);
+  return _.compact(_.flatten(matchkeys.filter(patterns, keywords, options).map(function (pattern) {
     return resolveDep.dep(pattern).join();
   })));
 };
+
 
 /**
  * Return the resolved filepaths to any npm modules that match the given list of keywords.
@@ -117,9 +125,10 @@ exports.resolve = function (patterns, config) {
  * @param  {[type]} config   [description]
  * @return {[type]}          [description]
  */
-exports.resolveDev = function (patterns, config) {
-  config = loadPkg(config);
-  return _.compact(_.flatten(exports.filter(patterns, config).map(function (pattern) {
+
+matchkeys.resolveDev = function (patterns, config, options) {
+  var keywords = loadKeywords(config);
+  return _.compact(_.flatten(matchkeys.filter(patterns, keywords, options).map(function (pattern) {
     return resolveDep.dev(pattern).join();
   })));
 };
@@ -131,10 +140,10 @@ exports.resolveDev = function (patterns, config) {
  * @param  {[type]} config   [description]
  * @return {[type]}          [description]
  */
-exports.resolveAll = function (patterns, config) {
-  config = loadPkg(config);
-  return _.compact(_.flatten(exports.filter(patterns, config).map(function (pattern) {
+
+matchkeys.resolveAll = function (patterns, config, options) {
+  var keywords = loadKeywords(config);
+  return _.compact(_.flatten(matchkeys.filter(patterns, keywords, options).map(function (pattern) {
     return resolveDep.all(pattern).join();
   })));
 };
-
