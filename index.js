@@ -7,9 +7,7 @@
 
 'use strict';
 
-var resolveDep = require('resolve-dep');
-var minimatch = require('minimatch');
-var pkg = require('load-pkg');
+var matched = require('matched');
 var _ = require('lodash');
 
 // Export the matchkeys object.
@@ -19,49 +17,8 @@ var toArray = function(val) {
   return !Array.isArray(val) ? [val] : val;
 };
 
-var matches = function(arr, patterns, options) {
-  if (!arr || !patterns) {
-    return [];
-  }
-
-  var opts = options || {}, matches = [], omissions = [];
-  arr = toArray(arr), patterns = toArray(patterns);
-
-  _.flatten(patterns.map(function(pattern) {
-    if (/!/.test(pattern)) {
-      pattern = pattern.replace('!', '');
-      omissions = omissions.concat(minimatch.match(arr, pattern, opts));
-    }
-    matches = matches.concat(minimatch.match(arr, pattern, opts));
-  }));
-
-  return _.difference(matches, omissions);
-};
-
-// console.log(matches(['foo', 'bar', 'baz'], ['f*', '*z']));
-console.log(matches(['foo', 'bar', 'baz'], ['!*z', 'f*']));
-
-
-// Check config for keywords
-function loadKeywords(config) {
-  // Allow an array to be passed in directly
-  if (Array.isArray(config)) {
-    return config;
-  }
-
-  config = config || {};
-  var keywords = config.keywords || pkg.keywords || [];
-
-  if (!Array.isArray(keywords)) {
-    throw new Error('  [matchkeys]: keywords must be an array');
-  }
-
-  if (keywords.length < 1) {
-    throw new Error('  [matchkeys]: no keywords found.');
-  }
-
-  return keywords;
-}
+var pkg = require('./package');
+console.log(pkg);
 
 
 /**

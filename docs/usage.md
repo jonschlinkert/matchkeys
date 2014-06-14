@@ -4,7 +4,7 @@ var keys = require('matchkeys');
 keys.match(arrayOne, arrayTwo));
 ```
 
-## Usage Example
+# Usage Example
 
 ```js
 var keys = require('matchkeys');
@@ -20,9 +20,9 @@ console.log(keys.match(pkg, pkgTwo));
 ```
 
 
-## Methods
+# Methods
 
-### matchPkgs
+## matchPkgs
 
 Match an array of keywords to multiple arrays of keywords returning the `package.json` object for each match.
 
@@ -38,7 +38,7 @@ Parameters:
 _Note that you do not need to specify the `keywords` property, just the object containing the keywords property_.
 
 
-#### example
+### example
 
 Given the following:
 
@@ -80,7 +80,7 @@ Returns:
 ```
 
 
-### isMatch
+## isMatch
 
 Same as `matchPkgs` but returns `true` or `false`.
 
@@ -101,7 +101,7 @@ Using the same example as `keys.matchPkgs`, this would return:
 ```
 
 
-### filter
+## filter
 
 Returns a list of keywords matching the given minimatch pattern.
 
@@ -111,7 +111,7 @@ keys.filter('*')
 ```
 
 
-### resolve
+## resolve
 
 ```js
 keys.resolve('*')
@@ -125,7 +125,7 @@ Returns the resolved paths to any npm modules that:
 1. A keyword is defined matching the name of the module
 
 
-### resolveDev
+## resolveDev
 
 ```js
 keys.resolveDev('*')
@@ -139,7 +139,7 @@ Returns the resolved paths to any npm modules that:
 1. A keyword is defined matching the name of the module
 
 
-### resolveDev
+## resolveDev
 
 ```js
 keys.resolveAll('*')
@@ -153,11 +153,11 @@ Returns the resolved paths to any npm modules that:
 1. A keyword is defined matching the name of the module
 
 
-## Contributing
+# Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality.
 
 
-## Related projects
+# Related projects
 
 + [helpers/resolve-dep](http://github.com/helpers/resolve-dep)
 + [assemble/assemble](https://assemble.io)
