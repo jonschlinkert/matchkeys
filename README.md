@@ -41,6 +41,8 @@ console.log(matchkeys(arr, 'o*'));
 // ]
 ```
 
+**Params:**
+
 * `array` {Object|Array}:  
 * `patterns` {String|Array}: The glob patterns or strings to use for matching. 
 * `prop` {String}: Optionally pass the name of the property to search. 
@@ -66,6 +68,8 @@ var keywords = [
 console.log(matchkeys.filter(keywords, '{p,b}*'));
 //=> ['banana', 'pineapple', 'blah']
 ```
+
+**Params:**
 
 * `array` {Array}: Can be an array or an _array of arrays_. 
 * `pattern` {Array|String}: The glob pattern to use. 

@@ -44,6 +44,8 @@ var arrayify = function(val) {
  * // ]
  * ```
  *
+ * **Params:**
+ *
  * @method  matchkeys
  * @param   {Object|Array} `array`
  * @param   {String|Array} `patterns` The glob patterns or strings to use for matching.
@@ -87,6 +89,8 @@ var matchkeys = module.exports = function matchkeys(arr, patterns, prop) {
  * console.log(matchkeys.filter(keywords, '{p,b}*'));
  * //=> ['banana', 'pineapple', 'blah']
  * ```
+ *
+ * **Params:**
  *
  * @method  filter
  * @param   {Array} `array` Can be an array or an _array of arrays_.
