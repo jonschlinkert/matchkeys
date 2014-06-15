@@ -10,97 +10,90 @@
 var matched = require('matched');
 var _ = require('lodash');
 
-// Export the matchkeys object.
-var matchkeys = module.exports = {};
 
-var toArray = function(val) {
+var arrayify = function(val) {
   return !Array.isArray(val) ? [val] : val;
 };
 
-var pkg = require('./package');
-console.log(pkg);
 
 
 /**
- * Compare two arrays of keywords
- * @param  {[type]} keywords [description]
- * @param  {Array}  a  Array of keywords to test against.
- * @param  {Array}  b  Array of keywords to search for matches.
- * @return {Boolean}   Return true if keywords match, otherwise false.
+ * ## matchkeys(array, patterns, property)
+ *
+ * Return an array of objects that contain arrays with matching strings. `patterns` may
+ * be glob patterns, strings, or an array of glob patterns or strings.
+ *
+ * **Example:**:
+ *
+ * ```js
+ * var arr = [
+ *   {name: 'a', keywords: ['apple', 'orange', 'grape']},
+ *   {name: 'b', keywords: ['banana', 'orange', 'pineapple']},
+ *   {name: 'c', keywords: ['watermelon', 'strawberry', 'kiwi']},
+ *   {name: 'd', keywords: ['watermelon', 'blah']},
+ *   {name: 'e', keywords: ['watermelon', 'blah', 'lodash']},
+ * ];
+ * console.log(matchkeys(arr, 'apple'));
+ * //=> [{name: 'a', keywords: ['apple', 'orange', 'grape']}]
+ *
+ * console.log(matchkeys(arr, 'o*'));
+ * //=>
+ * // [
+ * //   {name: 'a', keywords: ['apple', 'orange', 'grape']},
+ * //   {name: 'b', keywords: ['banana', 'orange', 'pineapple']}
+ * // ]
+ * ```
+ *
+ * @method  matchkeys
+ * @param   {Object|Array} `array`
+ * @param   {String|Array} `patterns` The glob patterns or strings to use for matching.
+ * @param   {String} `prop` Optionally pass the name of the property to search.
+ * @return  {Array} Array of objects with matching strings.
  */
 
-matchkeys.find = function(a, b) {
-  a = loadKeywords(a);
-  b = loadKeywords(b);
-  return _.intersection(a, b);
+var matchkeys = module.exports = function matchkeys(arr, patterns, prop) {
+	var matches = [];
+	prop = prop || 'keywords';
+	arrayify(arr).forEach(function(obj) {
+		if (obj[prop]) {
+			if (matched(obj[prop], patterns).length) {
+				matches.push(obj);
+			}
+		}	else {
+			console.warn('Property: "' + prop + '" not found.');
+		}
+	});
+	return matches;
 };
 
 
 /**
- * Compare two arrays of keywords and return true if ANY keywords match.
- * @param  {Array}  a  Array of keywords to test against.
- * @param  {Array}  b  Array of keywords to search for matches.
- * @return {Boolean}   Return true if keywords match, otherwise false.
+ * ## matchkeys.filter(array, patterns)
+ *
+ * Wrapper around [matched](https://github.com/jonschlinkert/matched). Returns
+ * an array of matching strings, from an array or arrays of strings.
+ *
+ * **Example:**
+ *
+ * ```js
+ * var keywords = [
+ *   ['apple', 'orange', 'grape'],
+ *   ['banana', 'orange', 'pineapple'],
+ *   ['watermelon', 'strawberry', 'kiwi'],
+ *   ['watermelon', 'blah'],
+ *   ['watermelon', 'blah', 'lodash'],
+ * ];
+ *
+ * console.log(matchkeys.filter(keywords, '{p,b}*'));
+ * //=> ['banana', 'pineapple', 'blah']
+ * ```
+ *
+ * @method  filter
+ * @param   {Array} `array` Can be an array or an _array of arrays_.
+ * @param   {Array|String} `pattern` The glob pattern to use.
+ * @return  {Array}
  */
 
-matchkeys.hasMatch = function(a, b) {
-  return matchkeys.find(a, b).length > 0;
-};
-
-
-/**
- * Return any keywords in the given list that match keywords in config.keywords.
- * @param  {[type]} pattern [description]
- * @param  {[type]} config  [description]
- * @return {[type]}         [description]
- */
-
-matchkeys.filter = function(config, pattern, options) {
-  var keywords = loadKeywords(config);
-  return minimatch.match(keywords, pattern, options);
-};
-
-
-/**
- * Resolve paths to npm modules based on keyword matches
- * @param  {[type]} keys   [description]
- * @param  {[type]} config [description]
- * @return {[type]}        [description]
- */
-
-matchkeys.resolve = function (patterns, config, options) {
-  var keywords = loadKeywords(config);
-  return _.compact(_.flatten(matchkeys.filter(patterns, keywords, options).map(function (pattern) {
-    return resolveDep.dep(pattern).join();
-  })));
-};
-
-
-/**
- * Return the resolved filepaths to any npm modules that match the given list of keywords.
- * @param  {[type]} patterns [description]
- * @param  {[type]} config   [description]
- * @return {[type]}          [description]
- */
-
-matchkeys.resolveDev = function (patterns, config, options) {
-  var keywords = loadKeywords(config);
-  return _.compact(_.flatten(matchkeys.filter(patterns, keywords, options).map(function (pattern) {
-    return resolveDep.dev(pattern).join();
-  })));
-};
-
-
-/**
- * Return the resolved filepaths to any npm modules that match the given list of keywords.
- * @param  {[type]} patterns [description]
- * @param  {[type]} config   [description]
- * @return {[type]}          [description]
- */
-
-matchkeys.resolveAll = function (patterns, config, options) {
-  var keywords = loadKeywords(config);
-  return _.compact(_.flatten(matchkeys.filter(patterns, keywords, options).map(function (pattern) {
-    return resolveDep.all(pattern).join();
-  })));
+matchkeys.filter = function(arr, pattern) {
+  return matched(arr, pattern);
 };

@@ -51,7 +51,8 @@
   "devDependencies": {
     "chai": "~1.9.1",
     "mocha": "*",
-    "verb": "~0.2.6"
+    "verb": "~0.2.6",
+    "verb-tag-jscomments": "^0.1.2"
   },
   "scripts": {
     "test": "mocha -R spec"
