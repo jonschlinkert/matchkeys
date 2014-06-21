@@ -7,7 +7,7 @@
 
 'use strict';
 
-var matched = require('matched');
+var matched = require('multimatch');
 var _ = require('lodash');
 
 

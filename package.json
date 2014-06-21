@@ -1,7 +1,7 @@
 {
   "name": "matchkeys",
   "description": "Utility for returning a list of arrays that contain matching keywords. Useful for filtering package.json files.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/jonschlinkert/matchkeys",
   "author": {
     "name": "Jon Schlinkert",
@@ -46,7 +46,7 @@
   ],
   "dependencies": {
     "lodash": "~2.4.1",
-    "matched": "^0.1.1"
+    "multimatch": "^0.3.0"
   },
   "devDependencies": {
     "chai": "~1.9.1",
