@@ -72,7 +72,7 @@ var matchkeys = module.exports = function matchkeys(arr, patterns, prop) {
 /**
  * ## matchkeys.filter(array, patterns)
  *
- * Wrapper around [matched](https://github.com/jonschlinkert/matched). Returns
+ * Wrapper around [multimatch](https://github.com/sindresorhus/multimatch). Returns
  * an array of matching strings, from an array or arrays of strings.
  *
  * **Example:**
